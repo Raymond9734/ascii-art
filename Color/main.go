@@ -41,6 +41,11 @@ func main() {
 			}
 		}
 	}
+	if len(color) == 0 {
+		fmt.Println("Usage: go run . [OPTION] [STRING]	")
+		fmt.Println("EX: go run . --color=<color> <letters to be colored> \"something\"")
+		os.Exit(0)
+	}
 
 	str = strings.Replace(str, "\\n", "\n", -1)
 	//  Removing the non-printable characters in the str string.
@@ -65,50 +70,61 @@ func main() {
 				fmt.Println()
 			}
 		} else {
-			for i := 0; i < 8; i++ {
-				for _, letter := range word {
-					line := Ascii.GetLine(1+int(letter-' ')*9+i, fileName)
-					oK, toClr := ToColor(word, os.Args[2])
+			PrintAsciiColor(word, os.Args[2], fileName, color)
 
-					if len(input) > 2 {
-						words := strings.Split(word, " ")
-						if (len(input) == 4 || len(os.Args) == 4) && oK && Check(words, toClr) && strings.ContainsRune(toClr, letter) {
-							fmt.Print(colour.ESCseq(color), line)
-						} else {
-							fmt.Print(colour.ESCseq("white"), line)
-						}
-
-					} else {
-						fmt.Print(colour.ESCseq(color), line)
-					}
-				}
-				fmt.Printf("\n")
-			}
 		}
 	}
 
 }
 
-func ToColor(str1 string, str2 string) (bool, string) {
+func ToColor(str1 string, str2 string) (bool, int, int) {
 	str := strings.Split(str1, " ")
 
 	//return strings.Contains(str1, str2)
+	startIndex := strings.Index(str1, str2)
 
+	endIndex := startIndex + len(str2)
 	for i := range str {
 		if str[i] == str2 {
-			return true, str[i]
+			return true, startIndex, endIndex
 		}
-
 	}
-	return false, ""
+	if strings.Contains(str1, str2) {
+		return true, 0, 0
+	}
+
+	return false, 0, 0
 
 }
-func Check(s []string, str string) bool {
 
-	for i := range s {
-		if s[i] == str {
-			return true
-		}
+func PrintAsciiColor(word string, toColor, fileName, color string) {
+
+	oK, startInd, endIdex := ToColor(word, toColor)
+	r, g, b, err := colour.RgbExtract(color)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	return false
+
+	for i := 0; i < 8; i++ {
+
+		for j, letter := range word {
+			line := Ascii.GetLine(1+int(letter-' ')*9+i, fileName)
+
+			if oK && startInd > 0 {
+				if j >= startInd && j <= endIdex {
+					fmt.Print(colour.ESCseq(r, g, b), line)
+				} else {
+					fmt.Print(colour.ESCseq(255, 255, 255), line)
+				}
+			} else if oK && strings.ContainsRune(toColor, letter) {
+				fmt.Print(colour.ESCseq(r, g, b), line)
+			} else {
+				fmt.Print(colour.ESCseq(255, 255, 255), line)
+			}
+
+		}
+		fmt.Printf("\n")
+	}
+
 }
