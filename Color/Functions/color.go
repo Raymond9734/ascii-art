@@ -15,11 +15,15 @@ func ESCseq(a, b, c int) string {
 
 // Function to convert HSL to RGB
 func hslToRgb(h, s, l float64) (r, g, b int) {
+	// calculation of Chroma(c) the colour strenght
 	c := (1 - math.Abs(2*l-1)) * s
-	x := c * (1 - math.Abs(math.Mod(h/60, 2)-1))
+	// Normalize hue and calculate intermediate value (x)
+	x := c * (math.Abs(math.Mod(h/60, 2) - 1))
+	//calculation of the amount of lightness to add to each RGB component to get the final value (M).
 	m := l - c/2
-
 	var r1, g1, b1 float64
+
+	// Determine the RGB values based on the hue (h) segment. (from 0 t0 360 degrees)
 	switch {
 	case 0 <= h && h < 60:
 		r1, g1, b1 = c, x, 0
@@ -33,18 +37,22 @@ func hslToRgb(h, s, l float64) (r, g, b int) {
 		r1, g1, b1 = x, 0, c
 	case 300 <= h && h < 360:
 		r1, g1, b1 = c, 0, x
-	}
 
+	}
+	// Adjust the RGB values by adding the match lightness (m) and scale it from 0 to 255 rgb values.
 	r = int((r1 + m) * 255)
 	g = int((g1 + m) * 255)
 	b = int((b1 + m) * 255)
 	return
 }
+
+// RgbExtract extracts RGB color values from a given input string.
+// It supports various formats such as HSL, hexadecimal, and named colors.
 func RgbExtract(str string) (int, int, int, error) {
 	var r, g, b int
 	var h, s, l float64
 
-	// hsl input obtain from the color  flag is processed here
+	// Process HSL input obtained from the color flag.
 	_, err := fmt.Sscanf(str, "hsl(%f,%f%%,%f%%)", &h, &s, &l)
 	if err == nil {
 
@@ -58,22 +66,22 @@ func RgbExtract(str string) (int, int, int, error) {
 
 		r, err := strconv.ParseInt(str[1:3], 16, 64)
 		if err != nil {
-			return 0, 0, 0, fmt.Errorf("invalid red value: %w", err)
+			return 0, 0, 0, fmt.Errorf("invalid red value:\n%w", err)
 		}
 
-		g, err := strconv.ParseInt(str[3:5], 16, 64)
-		if err != nil {
-			return 0, 0, 0, fmt.Errorf("invalid green value: %w", err)
+		g, err1 := strconv.ParseInt(str[3:5], 16, 64)
+		if err1 != nil {
+			return 0, 0, 0, fmt.Errorf("invalid green value:\n%w", err1)
 		}
 
-		b, err := strconv.ParseInt(str[5:7], 16, 64)
-		if err != nil {
-			return 0, 0, 0, fmt.Errorf("invalid blue value: %w", err)
+		b, err2 := strconv.ParseInt(str[5:7], 16, 64)
+		if err2 != nil {
+			return 0, 0, 0, fmt.Errorf("invalid blue value:\n%w", err2)
 		}
 		return int(r), int(g), int(b), nil
 	}
 
-	//one word colors ar processes in the switch case and by defaul the rgb color input is processed as the last option
+	//one word colors are processed in the switch case and by default the rgb color input is processed as the last option
 
 	switch str {
 	case "white":
@@ -136,10 +144,12 @@ func RgbExtract(str string) (int, int, int, error) {
 		b = 235
 
 	default:
+		// If none of the above conditions match, attempt to extract RGB values directly.
 		_, err := fmt.Sscanf(str, "rgb(%d,%d,%d)", &r, &g, &b)
 		if err != nil {
 			fmt.Println("Use: go run . '--color=white'  '<YourText>'")
 			fmt.Println("Use: go run . '--color=rgb(255, 255, 255)'   '<YourText>'")
+			fmt.Println("Use: go run . '--color=hsl(0, 100%, 50%)'   '<YourText>'")
 
 			return 0, 0, 0, errors.New("use: go run . '--color=#ffffff'  '<YourText>'")
 		}

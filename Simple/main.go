@@ -46,9 +46,8 @@ func main() {
 				fmt.Println()
 			}
 		} else {
-			for _, line := range Ascii.PrintBanner(word, fileName) {
-				fmt.Println(strings.Join(line, ""))
-			}
+			PrintBanner(word, fileName)
+
 		}
 	}
 }

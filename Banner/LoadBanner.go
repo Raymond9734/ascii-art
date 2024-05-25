@@ -54,6 +54,13 @@ func LoadBanner(name string) map[rune]string {
 
 // GetLine is a function to read font from files
 func GetLine(num int, filename string) string {
+	// Checks if the banner file size is not altered.
+	filePath, err := FileCheck(filename)
+	if err != nil {
+		fmt.Println(err, filePath)
+		os.Exit(1)
+	}
+
 	f, e := os.Open("../BannerFiles/" + filename + ".txt")
 	if e != nil {
 		fmt.Println(e.Error())
