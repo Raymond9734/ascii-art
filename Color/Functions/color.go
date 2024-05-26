@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 )
 
 //the color function that paints the output
@@ -82,7 +83,7 @@ func RgbExtract(str string) (int, int, int, error) {
 	}
 
 	//one word colors are processed in the switch case and by default the rgb color input is processed as the last option
-
+	str = strings.ToLower(str)
 	switch str {
 	case "white":
 		r = 255
@@ -147,6 +148,7 @@ func RgbExtract(str string) (int, int, int, error) {
 		// If none of the above conditions match, attempt to extract RGB values directly.
 		_, err := fmt.Sscanf(str, "rgb(%d,%d,%d)", &r, &g, &b)
 		if err != nil {
+			fmt.Print("\033[0m")
 			fmt.Println("Use: go run . '--color=white'  '<YourText>'")
 			fmt.Println("Use: go run . '--color=rgb(255, 255, 255)'   '<YourText>'")
 			fmt.Println("Use: go run . '--color=hsl(0, 100%, 50%)'   '<YourText>'")

@@ -62,8 +62,34 @@ func main() {
 	} else if str == "" {
 		return
 	}
-	// Split the str into lines based on newline characters.
 
+	colors := strings.Split(color, "/")
+	toColor := make(map[rune]string)
+
+	proced, newColors := ColorCheck(colors)
+
+	if proced {
+		for i, ch := range os.Args[2] {
+			if len(os.Args[2]) >= len(colors) && i != len(newColors) && i < len(newColors) {
+				toColor[ch] = colors[i]
+			} else if i < len(colors) {
+
+				toColor[ch] = colors[i]
+
+			}
+		}
+	} else if !proced && len(newColors) == 1 {
+		for _, ch := range os.Args[2] {
+			toColor[ch] = colors[0]
+		}
+
+	} else {
+		fmt.Println("Usage: go run . [OPTION] [STRING]  ")
+		fmt.Println("EX: go run . --color=<color> <letters to be colored> \"something\"")
+		os.Exit(0)
+	}
+
+	// Split the str into lines based on newline characters.
 	Input := strings.Split(str, "\n")
 
 	spaceCount := 0
@@ -75,9 +101,32 @@ func main() {
 				fmt.Println()
 			}
 		} else {
-			colour.PrintAsciiColor(word, os.Args[2], fileName, color)
+			colour.PrintAsciiColor(word, toColor, os.Args[2], fileName, color)
 
 		}
 	}
+
+}
+func ColorCheck(c []string) (bool, []string) {
+	NewC := make([]string, 0, len(c))
+	if len(c) == 0 {
+		return false, c
+	}
+
+	for _, col := range c {
+		if col != "" {
+			_, _, _, err := colour.RgbExtract(col)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			NewC = append(NewC, col)
+		}
+	}
+	if len(NewC) == 0 || len(NewC) == 1 {
+		return false, NewC
+	}
+
+	return true, NewC
 
 }

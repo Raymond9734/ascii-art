@@ -51,7 +51,7 @@ func FindSubstringIndx(str, subStr string) (int, int) {
 			if len(subStr) > 1 {
 				return i, i + len(subStr) - 1
 			} else {
-				return i, i + len(subStr) - 1
+				return i, i + len(subStr)
 			}
 
 		}
@@ -62,15 +62,16 @@ func FindSubstringIndx(str, subStr string) (int, int) {
 }
 
 // PrintAsciiColor prints a word in ASCII art with optional coloring for a specific substring.
-func PrintAsciiColor(word string, toColor, fileName, color string) {
+func PrintAsciiColor(word string, toColor map[rune]string, wordToColor, fileName, color string) {
 
-	oK, startInd, endIdex := ToColor(word, toColor)
-
-	r, g, b, err := RgbExtract(color)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	oK, startInd, endIdex := ToColor(word, wordToColor)
+	var r, g, b int
+	var err error
+	// r, g, b, err := RgbExtract(color)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
 
 	for i := 0; i < 8; i++ {
 
@@ -79,15 +80,28 @@ func PrintAsciiColor(word string, toColor, fileName, color string) {
 			line := Ascii.GetLine(1+int(letter-' ')*9+i, fileName)
 
 			if oK && startInd >= 0 && endIdex > 0 {
+				if color, found := toColor[letter]; found {
+					r, g, b, err = RgbExtract(color)
+					if err != nil {
 
+						fmt.Println(err)
+						os.Exit(1)
+					}
+				}
 				if j >= startInd && j <= endIdex {
 
 					fmt.Print(ESCseq(r, g, b), line)
 				} else {
 					fmt.Print(ESCseq(255, 255, 255), line)
 				}
-			} else if oK && strings.ContainsRune(toColor, letter) {
-
+			} else if oK && strings.ContainsRune(wordToColor, letter) {
+				if color, found := toColor[letter]; found {
+					r, g, b, err = RgbExtract(color)
+					if err != nil {
+						fmt.Println(err)
+						os.Exit(1)
+					}
+				}
 				fmt.Print(ESCseq(r, g, b), line)
 			} else {
 
@@ -99,3 +113,25 @@ func PrintAsciiColor(word string, toColor, fileName, color string) {
 	}
 
 }
+
+// func PrintAsciiColor(word string, toColor map[rune]string, fileName string) {
+// 	for i := 0; i < 8; i++ {
+// 		for _, letter := range word {
+// 			// Get the ASCII art line for the current letter.
+// 			line := GetLine(1+int(letter-' ')*9+i, fileName)
+
+// 			if color, found := toColor[letter]; found {
+// 				r, g, b, err := RgbExtract(color)
+// 				if err != nil {
+// 					fmt.Println(err)
+// 					os.Exit(1)
+// 				}
+// 				fmt.Print(ESCseq(r, g, b), line)
+// 			} else {
+// 				// Default color (white)
+// 				fmt.Print(ESCseq(255, 255, 255), line)
+// 			}
+// 		}
+// 		fmt.Printf("\n")
+// 	}
+// }
