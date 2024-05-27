@@ -13,7 +13,7 @@ func LoadBanner(name string) map[rune]string {
 	Banner := make(map[rune]string) // Map to store the banner characters
 	currentChar := rune(32)
 	charLine := []string{}                        // Slice to store lines of the current character
-	filePath := "../BannerFiles/" + name + ".txt" // Construct the file path
+	filePath := "../bannerFiles/" + name + ".txt" // Construct the file path
 
 	// Open the file
 	file, err := os.Open(filePath)
@@ -61,7 +61,7 @@ func GetLine(num int, filename string) string {
 		os.Exit(1)
 	}
 
-	f, e := os.Open("../BannerFiles/" + filename + ".txt")
+	f, e := os.Open("../bannerFiles/" + filename + ".txt")
 	if e != nil {
 		fmt.Println(e.Error())
 		os.Exit(0)
